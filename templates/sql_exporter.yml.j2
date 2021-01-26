@@ -1,0 +1,14 @@
+global:
+  scrape_timeout_offset: {{ sql_exporter_params.scrape_timeout_offset | default('500ms') }}
+  min_interval: {{ sql_exporter_params.min_interval | default('0s') }}
+  max_connections: {{ sql_exporter_params.max_connections | default('3') }}
+  max_idle_connections: {{ sql_exporter_params.max_idle_connections | default('3') }}
+
+{% if sql_exporter_target is defined %}
+target:
+  data_source_name: '{{ sql_exporter_target.data_source_name }}'
+  collectors: [{{ sql_exporter_target.collectors }}]
+{% endif %}
+
+collector_files:
+  - "*.collector.yml"

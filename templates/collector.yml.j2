@@ -1,0 +1,18 @@
+collector_name: {{ collector.name }}
+
+{% if collector.min_interval is defined %}min_interval: {{ collector.min_interval }}{% endif %}
+
+metrics:
+{% for metric in collector.metrics %}
+  - metric_name: {{ metric.name }}
+    type: {{ metric.type | default('gauge') }}
+    help: '{{ metric.help | default('No help specified') }}'
+    values: [{{ metric['values'] }}]
+{% for key, value in metric.items() %}
+{% if key != 'name' and key != 'type' and key != 'help' and key != 'values' and key != 'query' %}
+    {{ key }}: {{ value }}
+{% endif %}
+{% endfor %}
+    query: |
+      {{ metric.query }}
+{% endfor %}

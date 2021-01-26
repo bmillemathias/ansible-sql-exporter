@@ -1,0 +1,19 @@
+---
+sql_exporter_version: "0.7.1"
+sql_exporter_targz_url: "https://github.com/burningalchemist/sql_exporter/releases/download/{{ sql_exporter_version }}/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+sql_exporter_targz_sums: "sha256:https://github.com/burningalchemist/sql_exporter/releases/download/{{ sql_exporter_version }}/sha256sums.txt"
+
+sql_exporter_config_file: sql_exporter.yml
+sql_exporter_user_name: sql_exporter
+sql_exporter_service_name: sql_exporter
+sql_exporter_systemd_unit: "/etc/systemd/system/{{ sql_exporter_service_name }}.service"
+
+sql_exporter_dirs:
+  binary_dir: /usr/local/bin
+  config_dir: /usr/local/etc/sql_exporter
+
+sql_exporter_params:
+  scrape_timeout_offset: 500ms
+  min_interval: 0s
+  max_connections: 3
+  max_idle_connections: 3

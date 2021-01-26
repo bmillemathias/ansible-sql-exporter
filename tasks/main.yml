@@ -1,0 +1,80 @@
+---
+- name: check if binary file exists
+  stat:
+    path: "{{ sql_exporter_dirs.binary_dir }}/sql_exporter"
+  register: binary_file
+
+- name: download tar.gz
+  get_url:
+    url: "{{ sql_exporter_targz_url }}"
+    dest: "/tmp/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+    checksum: "{{ sql_exporter_targz_sums }}"
+  when: not binary_file.stat.exists
+
+- name: "extract binary to {{ sql_exporter_dirs.binary_dir }}"
+  unarchive:
+    src: "/tmp/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+    dest: "{{ sql_exporter_dirs.binary_dir }}"
+    owner: root
+    group: root
+    remote_src: yes
+    extra_opts:
+      - --strip-components=1
+      - "sql_exporter-{{ sql_exporter_version }}.linux-amd64/sql_exporter"
+  when: not binary_file.stat.exists
+
+- name: remove tar.gz
+  file:
+    path: "/tmp/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+    state: absent
+  when: not binary_file.stat.exists
+
+- name: create config dir
+  file:
+    path: "{{ sql_exporter_dirs.config_dir }}"
+    state: directory
+
+- name: create user
+  user:
+    name: "{{ sql_exporter_user_name }}"
+    home: "/nonexistent"
+    create_home: no
+    shell: "/bin/false"
+    system: yes
+
+- name: create main config
+  template:
+    src: sql_exporter.yml.j2
+    dest: "{{ sql_exporter_dirs.config_dir }}/{{ sql_exporter_config_file }}"
+    owner: root
+    group: "{{ sql_exporter_user_name }}"
+    mode: 0640
+  notify: restart sql_exporter service
+
+- name: create collectors configs
+  template:
+    src: collector.yml.j2
+    dest: "{{ sql_exporter_dirs.config_dir }}/{{ item.name }}.collector.yml"
+    owner: root
+    group: "{{ sql_exporter_user_name }}"
+    mode: 0640
+  notify: restart sql_exporter service
+  vars:
+    collector: "{{ item }}"
+  when: item.name is defined
+  loop: "{{ sql_exporter_collectors | default([]) }}"
+
+- name: create systemd unit
+  template:
+    src: sql_exporter.service.j2
+    dest: "{{ sql_exporter_systemd_unit }}"
+  notify:
+    - reload sql_exporter unit
+    - restart sql_exporter service
+
+- meta: flush_handlers
+
+- name: enable service
+  systemd:
+    name: "{{ sql_exporter_service_name }}"
+    enabled: true

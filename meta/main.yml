@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: OSSHelp team
+  description: Ansible role which installs and setups slq_exporter (https://github.com/free/sql_exporter)
+  company: OSSHelp
+  license: GPL3
+  min_ansible_version: 2.8
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+          bionic
+  galaxy_tags:
+    - sql
+    - exporter
+    - prometheus

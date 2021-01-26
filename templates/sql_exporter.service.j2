@@ -1,0 +1,17 @@
+[Unit]
+Description=sql_exporter
+
+[Service]
+Type=simple
+User={{ sql_exporter_user_name }}
+Group={{ sql_exporter_user_name }}
+RuntimeDirectory=sql_exporter
+RuntimeDirectoryMode=0755
+ExecStart=/sbin/start-stop-daemon -Smp /run/sql_exporter/sql_exporter.pid -x {{ sql_exporter_dirs.binary_dir }}/sql_exporter -- --config.file={{ sql_exporter_dirs.config_dir }}/{{ sql_exporter_config_file }}
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sql_exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
