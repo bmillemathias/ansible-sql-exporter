@@ -29,11 +29,6 @@
     state: absent
   when: not binary_file.stat.exists
 
-- name: create config dir
-  file:
-    path: "{{ sql_exporter_dirs.config_dir }}"
-    state: directory
-
 - name: create sql_exporter group                   
   group:                                            
     name: "{{ sql_exporter_user_name }}"            
@@ -47,6 +42,14 @@
     create_home: no
     shell: "/bin/false"
     system: yes
+
+- name: create config dir
+  file:
+    path: "{{ sql_exporter_dirs.config_dir }}"
+    state: directory
+    owner: "{{ sql_exporter_user_name }}"
+    group: "{{ sql_exporter_user_name }}"
+    mode: 0750
 
 - name: create main config
   template:
